@@ -8,11 +8,11 @@
     body { 
       font-family: Arial, sans-serif; 
       text-align: center; 
-      background-color: #FAF9F6; 
+      background-color: #F5F5F5; /* Nøytral grå bakgrunn */
     }
     h1 {
       font-size: 2em;
-      margin-bottom: 10px;
+      margin-bottom: 20px; /* Økt avstand under tittelen */
     }
     .container { 
       width: 90%; 
@@ -34,17 +34,18 @@
       font-size: 1.5em; 
       color: black; 
       position: absolute; 
-      top: 10px; 
+      top: 60px; /* Flyttet klokken lenger ned */
       right: 10px; 
     }
     @media (max-width: 600px) {
       #clock {
         font-size: 1.2em; 
-        top: 5px; 
+        top: 40px; /* Enda lavere plassering på små skjermer */
         right: 5px; 
       }
       h1 {
         font-size: 1.5em; 
+        margin-bottom: 15px; /* Mindre avstand på små skjermer */
       }
       .container {
         padding: 10px; 
@@ -52,32 +53,33 @@
     }
     #liveEarnings { 
       font-size: 3em; 
-      background: #50C878; 
+      background: #4CAF50; /* Litt mørkere grønn */
       color: white; 
       padding: 40px; 
       border-radius: 20px; 
     }
     #effectiveHourlyRate { 
       font-size: 1.5em; 
-      background: #6495ED; 
+      background: #007BFF; /* Blått tema */
       color: white; 
     }
     #hourlyRateDisplay { 
-      font-size: 1.5em; 
-      background: #FFD700; 
+      font-size: 1.2em; /* Mindre tekst */
+      background: #E0E0E0; /* Nøytral grå bakgrunn */
       color: black; 
-      padding: 15px; 
+      padding: 10px; /* Mindre padding */
       border-radius: 8px; 
+      margin: 10px 0; 
     }
     #nightBonus, #weekendBonus, #holidayBonus, #lokalttogBonus { 
       font-size: 1.2em; 
     }
     .active { 
-      background: #50C878; 
+      background: #4CAF50; /* Grønn for aktiv */
       color: black; 
     }
     .inactive { 
-      background: #D22B2B; 
+      background: #D22B2B; /* Rød for inaktiv */
       color: black; 
     }
     input { 
@@ -168,8 +170,10 @@
       let baseEarnings = elapsedHours * hourlyRate;
       let nightMinutes = computeBonusMinutes(start, current, isNightBonusMinute);
       let weekendMinutes = computeBonusMinutes(start, current, isWeekendBonusMinute);
-      let nightBonusTotal = (nightMinutes / 60) * 151.27;
-      let weekendBonusTotal = (weekendMinutes / 60) * 151.27;
+      let nightBonusHours = nightMinutes / 60;
+      let weekendBonusHours = weekendMinutes / 60;
+      let nightBonusTotal = nightBonusHours * 151.27;
+      let weekendBonusTotal = weekendBonusHours * 151.27;
       let holidayBonusPay = 0;
       if (document.getElementById("holidayCheckbox").checked) {
         let bonusStart = new Date(start);
@@ -183,7 +187,7 @@
           holidayBonusPay = bonusHours * hourlyRate;
         }
       }
-      let lokalttogBonus = document.getElementById("lokalttogCheckbox").checked ? 134.46 : 0;
+      let lokalttogBonus = document.getElementById("lokalttogCheckbox").checked ? hourlyRate * 0.4 : 0; // 40% av timelønnen
       const earnings = baseEarnings + nightBonusTotal + weekendBonusTotal + holidayBonusPay + lokalttogBonus;
       document.getElementById("liveEarnings").textContent = `Tjent hittil: ${earnings.toFixed(2)} kr`;
     }
@@ -233,7 +237,7 @@
         document.getElementById("holidayBonus").textContent = "kr 0 - Helligdagstillegg (0 timer)";
         document.getElementById("holidayBonus").className = "box inactive";
       }
-      let lokalttogBonus = lokalttogActive ? 134.46 : 0;
+      let lokalttogBonus = lokalttogActive ? hourlyRate * 0.4 : 0; // 40% av timelønnen
       if (lokalttogActive) {
         document.getElementById("lokalttogBonus").textContent = `kr ${lokalttogBonus.toFixed(2)} - Lokalttog tillegg`;
         document.getElementById("lokalttogBonus").className = "box active";
@@ -242,6 +246,25 @@
         document.getElementById("lokalttogBonus").className = "box inactive";
       }
       let totalEarnings = baseEarnings + nightBonusTotal + weekendBonusTotal + holidayBonusPay + lokalttogBonus;
+
+      // Oppdater kveldstillegg-boksen
+      if (nightBonusTotal > 0) {
+        document.getElementById("nightBonus").textContent = `kr ${nightBonusTotal.toFixed(2)} - Kveldstillegg (${nightBonusHours.toFixed(2)} timer)`;
+        document.getElementById("nightBonus").className = "box active";
+      } else {
+        document.getElementById("nightBonus").textContent = "kr 0 - Kveldstillegg";
+        document.getElementById("nightBonus").className = "box inactive";
+      }
+
+      // Oppdater helgetillegg-boksen
+      if (weekendBonusTotal > 0) {
+        document.getElementById("weekendBonus").textContent = `kr ${weekendBonusTotal.toFixed(2)} - Helgetillegg (${weekendBonusHours.toFixed(2)} timer)`;
+        document.getElementById("weekendBonus").className = "box active";
+      } else {
+        document.getElementById("weekendBonus").textContent = "kr 0 - Helgetillegg";
+        document.getElementById("weekendBonus").className = "box inactive";
+      }
+
       const effectiveHourlyRate = hoursWorked > 0 ? (totalEarnings / hoursWorked) : 0;
       document.getElementById("workDuration").textContent = `Vakttid: ${hoursWorked.toFixed(2)} timer (Basis)`;
       document.getElementById("totalEarnings").textContent = `Total lønn: ${totalEarnings.toFixed(2)} kr`;
@@ -254,7 +277,7 @@
           ? `Helligdagstillegg: (Ekstra ${holidayBonusHours.toFixed(2)} timer * ${hourlyRate.toFixed(2)} kr) = ${holidayBonusPay.toFixed(2)} kr<br>` 
           : "") +
         (lokalttogActive 
-          ? `Lokalttog tillegg: Engangsbeløp = ${lokalttogBonus.toFixed(2)} kr<br>` 
+          ? `Lokalttog tillegg: 40% av timelønn = ${lokalttogBonus.toFixed(2)} kr<br>` 
           : "") +
         `Sum: ${baseEarnings.toFixed(2)} + ${nightBonusTotal.toFixed(2)} + ${weekendBonusTotal.toFixed(2)} ${holidayActive ? "+ " + holidayBonusPay.toFixed(2) : ""} ${lokalttogActive ? "+ " + lokalttogBonus.toFixed(2) : ""} = ${totalEarnings.toFixed(2)} kr`;
       document.getElementById("effectiveHourlyRate").textContent = `Effektiv timelønn: ${effectiveHourlyRate.toFixed(2)} kr`;
