@@ -5,23 +5,69 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lønnsklokke</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; background-color: #FAF9F6; }
-    .container { width: 60%; margin: auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    .box { margin: 10px 0; padding: 15px; border-radius: 8px; font-size: 1.2em; font-weight: bold; }
-    #clock { font-size: 1.5em; background: #6495ED; color: white; }
+    body { 
+      font-family: Arial, sans-serif; 
+      text-align: center; 
+      background-color: #FAF9F6; 
+      position: relative; /* For å tillate absolutt posisjonering av klokken */
+    }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+    .container { 
+      width: 60%; 
+      margin: auto; 
+      padding: 20px; 
+      background: white; 
+      border-radius: 10px; 
+      box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+    }
+    .box { 
+      margin: 10px 0; 
+      padding: 15px; 
+      border-radius: 8px; 
+      font-size: 1.2em; 
+      font-weight: bold; 
+    }
+    #clock { 
+      font-size: 2em; /* Samme størrelse som "Lønnsklokke" */
+      color: black; 
+      position: absolute; 
+      top: 0; 
+      right: 10px; /* Flyttet til høyre side */
+    }
     #liveEarnings { 
       font-size: 3em; /* Økt tekststørrelse */
       background: #50C878; 
       color: white; 
-      padding: 30px; /* Tredoblet størrelse */
-      border-radius: 15px; /* Litt større avrunding */
+      padding: 40px; /* Enda større boks */
+      border-radius: 20px; /* Litt større avrunding */
     }
-    #effectiveHourlyRate { font-size: 1.5em; background: #6495ED; color: white; }
-    #nightBonus, #weekendBonus, #holidayBonus, #lokalttogBonus { font-size: 1.2em; }
-    .active { background: #50C878; color: black; }
-    .inactive { background: #D22B2B; color: black; }
-    input { padding: 10px; margin: 5px; font-size: 1.1em; }
-    .checkbox-group { margin: 10px 0; }
+    #effectiveHourlyRate { 
+      font-size: 1.5em; 
+      background: #6495ED; 
+      color: white; 
+    }
+    #nightBonus, #weekendBonus, #holidayBonus, #lokalttogBonus { 
+      font-size: 1.2em; 
+    }
+    .active { 
+      background: #50C878; 
+      color: black; 
+    }
+    .inactive { 
+      background: #D22B2B; 
+      color: black; 
+    }
+    input { 
+      padding: 10px; 
+      margin: 5px; 
+      font-size: 1.1em; 
+    }
+    .checkbox-group { 
+      margin: 10px 0; 
+    }
   </style>
 </head>
 <body>
@@ -177,9 +223,10 @@
         document.getElementById("lokalttogBonus").className = "box inactive";
       }
       let totalEarnings = baseEarnings + nightBonusTotal + weekendBonusTotal + holidayBonusPay + lokalttogBonus;
-      // Totalt effektiv arbeidstid: basis + ekstra helligdagstimer (lokalttog tillegg gis ikke per time)
-      let totalArbeidstid = hoursWorked + (holidayActive ? holidayBonusHours : 0);
-      document.getElementById("workDuration").textContent = `Vakttid: ${hoursWorked.toFixed(2)} timer (Basis) + ${holidayActive ? holidayBonusHours.toFixed(2) + " timer (Helligdag)" : "0 timer"}`;
+      // Beregne effektiv timelønn basert på totalsummen delt på basis timer
+      const effectiveHourlyRate = hoursWorked > 0 ? (totalEarnings / hoursWorked) : 0;
+
+      document.getElementById("workDuration").textContent = `Vakttid: ${hoursWorked.toFixed(2)} timer (Basis)`;
       document.getElementById("totalEarnings").textContent = `Total lønn: ${totalEarnings.toFixed(2)} kr`;
       document.getElementById("calculationBreakdown").innerHTML = 
         "Regnestykke:<br>" +
@@ -193,7 +240,7 @@
           ? `Lokalttog tillegg: Engangsbeløp = ${lokalttogBonus.toFixed(2)} kr<br>` 
           : "") +
         `Sum: ${baseEarnings.toFixed(2)} + ${nightBonusTotal.toFixed(2)} + ${weekendBonusTotal.toFixed(2)} ${holidayActive ? "+ " + holidayBonusPay.toFixed(2) : ""} ${lokalttogActive ? "+ " + lokalttogBonus.toFixed(2) : ""} = ${totalEarnings.toFixed(2)} kr`;
-      const effectiveHourlyRate = totalArbeidstid > 0 ? (totalEarnings / totalArbeidstid) : 0;
+
       document.getElementById("effectiveHourlyRate").textContent = `Effektiv timelønn: ${effectiveHourlyRate.toFixed(2)} kr`;
     }
     // Hjelpefunksjoner for visning av bonusperiodens start og slutt (kun for regnestykke-visning)
